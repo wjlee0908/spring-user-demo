@@ -1,6 +1,5 @@
-package com.woojin.userdemo.domain.user.repository;
+package com.woojin.userdemo.user;
 
-import com.woojin.userdemo.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

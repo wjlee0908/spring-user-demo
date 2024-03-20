@@ -1,4 +1,4 @@
-package com.woojin.userdemo.domain.user.entity;
+package com.woojin.userdemo.user;
 
 import jakarta.persistence.*;
 import lombok.Getter;
