@@ -3,7 +3,10 @@ package com.woojin.userdemo.user;
 import com.woojin.userdemo.user.dto.UserCreateDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,28 +25,28 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public String signup(@Valid UserCreateDto userCreateDto, BindingResult bindingResult) {
+    public ResponseEntity signup(@Valid UserCreateDto userCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "signup_form";
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         if(!userCreateDto.getPassword().equals(userCreateDto.getPasswordConfirm())) {
-            bindingResult.rejectValue("passwordConfirm", "PASSWORD_INCORRECT", "패스워드 확인이 일치하지 않습니다.");
-            return "signup_form";
+            bindingResult.rejectValue("passwordConfirm", "PASSWORD_INCORRECT", "Password confirmation does not match");
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         try {
             userService.create(userCreateDto.getUsername(), userCreateDto.getEmail(), userCreateDto.getPassword());
         } catch(DataIntegrityViolationException err) {
             err.printStackTrace();
-            bindingResult.reject("SIGN_UP_FAILED", "이미 등록된 사용자입니다.");
-            return "signup_form";
+            bindingResult.reject("SIGN_UP_FAILED", "User already exists");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(bindingResult.getAllErrors());
         } catch (Exception err) {
             err.printStackTrace();
             bindingResult.reject("SIGN_UP_FAILED", err.getMessage());
-            return "signup_form";
+            return ResponseEntity.internalServerError().body(bindingResult.getAllErrors());
         }
 
-        return "redirect:/";
+        return new ResponseEntity("OK", HttpStatus.CREATED);
     }
 }
