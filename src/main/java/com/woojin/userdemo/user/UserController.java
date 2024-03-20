@@ -3,6 +3,7 @@ package com.woojin.userdemo.user;
 import com.woojin.userdemo.user.dto.UserCreateDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,17 @@ public class UserController {
             return "signup_form";
         }
 
-        userService.create(userCreateDto.getUsername(), userCreateDto.getEmail(), userCreateDto.getPassword());
+        try {
+            userService.create(userCreateDto.getUsername(), userCreateDto.getEmail(), userCreateDto.getPassword());
+        } catch(DataIntegrityViolationException err) {
+            err.printStackTrace();
+            bindingResult.reject("SIGN_UP_FAILED", "이미 등록된 사용자입니다.");
+            return "signup_form";
+        } catch (Exception err) {
+            err.printStackTrace();
+            bindingResult.reject("SIGN_UP_FAILED", err.getMessage());
+            return "signup_form";
+        }
 
         return "redirect:/";
     }
