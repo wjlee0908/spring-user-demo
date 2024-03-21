@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -14,17 +15,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 
-
+@RequiredArgsConstructor
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Value("${USER_JWT_SECRET}")
     private String JWT_SECRET;
 
     @Value("${USER_JWT_ISSUER}")
     private String JWT_ISSUER;
-
-    public JwtLoginFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
-    }
 
     /**
      * 로그인 성공 시 호출.

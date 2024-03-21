@@ -16,9 +16,9 @@ import java.util.Optional;
 /**
  * UserDetailsService - 사용자 조회 기능
  */
-@RequiredArgsConstructor
 @Service
-public class UserSecurityService implements UserDetailsService {
+@RequiredArgsConstructor
+public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
 
