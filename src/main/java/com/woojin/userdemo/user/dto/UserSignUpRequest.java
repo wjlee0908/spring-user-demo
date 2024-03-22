@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserSignUpRequest {
-    @Size(min = User.MIN_USERNAME_LENGTH, max = User.MAX_USERNAME_LENGTH)
+    @Size(min = 3, max = 25)
     @NotEmpty(message = "사용자 ID는 필수 항목입니다.")
     private String username;
 
