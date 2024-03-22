@@ -1,5 +1,6 @@
 package com.woojin.userdemo.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,8 @@ public class User implements UserDetails {
     @Column(unique = true)
     private String username;
 
+    @Column
+    @JsonIgnore
     private String password;
 
     @Column(unique = true)

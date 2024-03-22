@@ -1,16 +1,20 @@
 package com.woojin.userdemo.user;
 
-import com.woojin.userdemo.user.dto.UserCreateRequest;
+import com.woojin.userdemo.global.dto.ApiError;
+import com.woojin.userdemo.global.dto.ErrorResponse;
+import com.woojin.userdemo.user.dto.UserSignUpRequest;
+import com.woojin.userdemo.user.dto.UserSignUpResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,28 +23,35 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity signup(@Valid UserCreateRequest userCreateRequest, BindingResult bindingResult) {
+    public ResponseEntity signup(@Valid UserSignUpRequest userSignUpRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+            return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                    bindingResult.getAllErrors().stream().map(
+                            error -> new ApiError(error.getCode(), error.getDefaultMessage())
+                    ).collect(Collectors.toList())
+            ));
         }
 
-        if(!userCreateRequest.getPassword().equals(userCreateRequest.getPasswordConfirm())) {
-            bindingResult.rejectValue("passwordConfirm", "PASSWORD_INCORRECT", "Password confirmation does not match");
-            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        if(!userSignUpRequest.getPassword().equals(userSignUpRequest.getPasswordConfirm())) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "PASSWORD_INCORRECT", "Password confirmation does not match"));
         }
 
         try {
-            userService.create(userCreateRequest.getUsername(), userCreateRequest.getEmail(), userCreateRequest.getPassword());
+            User user = userService.create(userSignUpRequest.getUsername(), userSignUpRequest.getEmail(), userSignUpRequest.getPassword());
+            UserSignUpResponse userSignUpResponse = new UserSignUpResponse(
+                user.getId(), user.getUsername(), user.getEmail()
+            );
+            return ResponseEntity.ok(userSignUpResponse);
         } catch(DataIntegrityViolationException err) {
             err.printStackTrace();
-            bindingResult.reject("SIGN_UP_FAILED", "User already exists");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(bindingResult.getAllErrors());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    new ErrorResponse(HttpStatus.CONFLICT.value(), "USER_ALREADY_EXISTS", "User already exists")
+            );
         } catch (Exception err) {
             err.printStackTrace();
-            bindingResult.reject("SIGN_UP_FAILED", err.getMessage());
-            return ResponseEntity.internalServerError().body(bindingResult.getAllErrors());
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "SIGN_UP_FAILED", err.getMessage())
+            );
         }
-
-        return new ResponseEntity("OK", HttpStatus.CREATED);
     }
 }

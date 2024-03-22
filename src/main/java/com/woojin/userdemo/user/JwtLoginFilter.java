@@ -62,7 +62,6 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         try {
             User user = (User) authResult.getPrincipal();
-            String username = user.getUsername();
 
             String jwtSecret = userConfigProperties.getJwtSecret();
             String jwtIssuer = userConfigProperties.getJwtIssuer();
@@ -71,10 +70,10 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
             Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
             String accessToken = JWT.create()
                     .withIssuer(jwtIssuer)
-                    .withSubject(username)
+                    .withSubject(user.getUsername())
                     .sign(algorithm);
 
-            UserLoginResponse userLoginResponse = new UserLoginResponse(accessToken);
+            UserLoginResponse userLoginResponse = new UserLoginResponse(user.getId(), accessToken);
             new ObjectMapper().writeValue(response.getOutputStream(), userLoginResponse);
         } catch (JWTCreationException | IOException exception) {
             exception.printStackTrace();
@@ -88,9 +87,9 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
-                Arrays.asList(
-                new ApiError( "INVALID_USERNAME_OR_PASSWORD", failed.getMessage())
-        ));
+                "INVALID_USERNAME_OR_PASSWORD",
+                failed.getMessage()
+        );
 
         new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
     }
