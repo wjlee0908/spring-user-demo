@@ -26,10 +26,10 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class JwtDecodeFilter extends OncePerRequestFilter {
-    @Value("${USER_JWT_SECRET}")
+    @Value("${user.jwt-secret}")
     private String JWT_SECRET;
 
-    @Value("${USER_JWT_ISSUER}")
+    @Value("${user.jwt-issuer}")
     private String JWT_ISSUER;
 
     private final UserDetailsServiceImpl userDetailsService;

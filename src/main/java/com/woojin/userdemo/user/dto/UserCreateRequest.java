@@ -8,7 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserCreateDto {
+public class UserCreateRequest {
     @Size(min = 3, max = 25)
     @NotEmpty(message = "사용자 ID는 필수 항목입니다.")
     private String username;

@@ -1,8 +1,14 @@
 package com.woojin.userdemo.global.config;
 
+import com.woojin.userdemo.user.JwtDecodeFilter;
+import com.woojin.userdemo.user.JwtLoginFilter;
+import com.woojin.userdemo.user.UserConfigProperties;
+import com.woojin.userdemo.user.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,28 +17,49 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] ALLOW_URLS = {
-            "/**",
+            "/login",
+            "/user/signup",
             "/v3/api-docs/**",
             "/swagger-ui/**"
     };
 
+    private final JwtDecodeFilter jwtDecodeFilter;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final UserConfigProperties userConfigProperties;
+
     @Bean
     // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 인증되지 않은 모든 페이지의 요청을 허락
-        http
-                .authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-                        .requestMatchers(ALLOW_URLS).permitAll());
-        http.sessionManagement((session) ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.csrf(AbstractHttpConfigurer::disable);
+        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.userDetailsService(userDetailsService);
+        AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
-        return http.build();
+        JwtLoginFilter jwtLoginFilter = new JwtLoginFilter(authenticationManager, userConfigProperties);
+        jwtLoginFilter.setUsernameParameter("username");
+        jwtLoginFilter.setPasswordParameter("password");
+
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .authorizeRequests()
+                .requestMatchers(ALLOW_URLS).permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .sessionManagement((sessionManagement) ->
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authenticationManager(authenticationManager)
+                .addFilterBefore(jwtDecodeFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     /**

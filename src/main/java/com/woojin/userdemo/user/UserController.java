@@ -1,9 +1,8 @@
 package com.woojin.userdemo.user;
 
-import com.woojin.userdemo.user.dto.UserCreateDto;
+import com.woojin.userdemo.user.dto.UserCreateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +19,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/signup")
-    public String signup(UserCreateDto userCreateDto) {
+    public String signup(UserCreateRequest userCreateDto) {
         return "signup_form";
     }
 
     @PostMapping("/signup")
-    public ResponseEntity signup(@Valid UserCreateDto userCreateDto, BindingResult bindingResult) {
+    public ResponseEntity signup(@Valid UserCreateRequest userCreateDto, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
