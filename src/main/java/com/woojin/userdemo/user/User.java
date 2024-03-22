@@ -15,6 +15,9 @@ import java.util.Collection;
 @Setter
 @Table
 public class User implements UserDetails {
+    public static final Integer MIN_USERNAME_LENGTH = 3;
+    public static final Integer MAX_USERNAME_LENGTH = 25;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

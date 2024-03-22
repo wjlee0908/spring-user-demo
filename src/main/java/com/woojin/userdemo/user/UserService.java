@@ -2,8 +2,10 @@ package com.woojin.userdemo.user;
 
 import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import com.woojin.userdemo.user.exceptions.UserNotFoundException;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,4 +52,23 @@ public class UserService {
 
         return user;
     }
+
+    public Boolean isPasswordMatchingConfirmation(String password, String passwordConfirm) {
+        return password.equals(passwordConfirm);
+    }
+
+    public User update(Long id, @Email String email, String password) {
+        User user = this.getById(id);
+
+        if(email != null) {
+            user.setEmail(email);
+        }
+
+        if(password != null) {
+            user.setPassword(passwordEncoder.encode(password));
+        }
+
+        return userRepository.save(user);
+    }
+
 }

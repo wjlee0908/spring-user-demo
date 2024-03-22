@@ -1,5 +1,6 @@
 package com.woojin.userdemo.user.dto;
 
+import com.woojin.userdemo.user.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserSignUpRequest {
-    @Size(min = 3, max = 25)
+    @Size(min = User.MIN_USERNAME_LENGTH, max = User.MAX_USERNAME_LENGTH)
     @NotEmpty(message = "사용자 ID는 필수 항목입니다.")
     private String username;
 

@@ -2,9 +2,10 @@ package com.woojin.userdemo.user;
 
 import com.woojin.userdemo.global.dto.ApiError;
 import com.woojin.userdemo.global.dto.ErrorResponse;
-import com.woojin.userdemo.user.dto.UserGetResponse;
+import com.woojin.userdemo.user.dto.UserResponse;
 import com.woojin.userdemo.user.dto.UserSignUpRequest;
 import com.woojin.userdemo.user.dto.UserSignUpResponse;
+import com.woojin.userdemo.user.dto.UserUpdateRequest;
 import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import jakarta.validation.Valid;
@@ -13,11 +14,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -31,7 +30,7 @@ public class UserController {
         try {
             User user = userService.getById(userId);
 
-            return ResponseEntity.ok(new UserGetResponse(user));
+            return ResponseEntity.ok(new UserResponse(user));
         } catch (UserNotFoundException err) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", err.getMessage()));
         }
@@ -42,7 +41,7 @@ public class UserController {
         try {
             User user = userService.getByAuthentication(authentication);
 
-            return ResponseEntity.ok(new UserGetResponse(user));
+            return ResponseEntity.ok(new UserResponse(user));
         } catch (UnauthorizedException unauthorizedException) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Cannot read current authentication"));
         } catch (UserNotFoundException userNotFoundException) {
@@ -51,7 +50,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity signup(@Valid UserSignUpRequest userSignUpRequest, BindingResult bindingResult) {
+    public ResponseEntity signup(@Valid UserSignUpRequest request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
                     bindingResult.getAllErrors().stream().map(
@@ -60,12 +59,12 @@ public class UserController {
             ));
         }
 
-        if(!userSignUpRequest.getPassword().equals(userSignUpRequest.getPasswordConfirm())) {
+        if(!userService.isPasswordMatchingConfirmation(request.getPassword(), request.getPasswordConfirm())) {
             return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "PASSWORD_INCORRECT", "Password confirmation does not match"));
         }
 
         try {
-            User user = userService.create(userSignUpRequest.getUsername(), userSignUpRequest.getEmail(), userSignUpRequest.getPassword());
+            User user = userService.create(request.getUsername(), request.getEmail(), request.getPassword());
             UserSignUpResponse userSignUpResponse = new UserSignUpResponse(
                 user.getId(), user.getUsername(), user.getEmail()
             );
@@ -83,4 +82,23 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/me")
+    public ResponseEntity updateMine(Authentication authentication, UserUpdateRequest request) {
+        try {
+            User user = userService.getByAuthentication(authentication);
+
+            if(request.getPassword() != null
+               && !userService.isPasswordMatchingConfirmation(request.getPassword(), request.getPasswordConfirm())) {
+                return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "PASSWORD_INCORRECT", "Password confirmation does not match"));
+            }
+
+            User updatedUser = userService.update(user.getId(), request.getEmail(), request.getPassword());
+
+            return ResponseEntity.ok(new UserResponse(updatedUser));
+        } catch (Exception err) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "UPDATE_FAILED", err.getMessage())
+            );
+        }
+    }
 }
