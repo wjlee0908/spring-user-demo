@@ -8,6 +8,9 @@ import com.woojin.userdemo.user.dto.UserSignUpResponse;
 import com.woojin.userdemo.user.dto.UserUpdateRequest;
 import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import com.woojin.userdemo.user.exceptions.UserNotFoundException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,10 +25,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User", description = "User CRUD 및 회원가입, 로그인")
 public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
+    @Operation(summary = "id가 userId인 유저 한 명을 조회합니다")
+    @Parameter(name = "userId", description = "조회할 유저의 id")
     public ResponseEntity getById(@PathVariable Long userId) {
         try {
             User user = userService.getById(userId);
@@ -95,6 +101,20 @@ public class UserController {
             User updatedUser = userService.update(user.getId(), request.getEmail(), request.getPassword());
 
             return ResponseEntity.ok(new UserResponse(updatedUser));
+        } catch (Exception err) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "UPDATE_FAILED", err.getMessage())
+            );
+        }
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity deleteMine(Authentication authentication) {
+        try {
+            User user = userService.getByAuthentication(authentication);
+            userService.delete(user.getId());
+
+            return ResponseEntity.ok(new UserResponse(user));
         } catch (Exception err) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "UPDATE_FAILED", err.getMessage())
