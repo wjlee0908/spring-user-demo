@@ -5,12 +5,15 @@ import com.woojin.userdemo.global.dto.ErrorResponse;
 import com.woojin.userdemo.user.dto.UserGetResponse;
 import com.woojin.userdemo.user.dto.UserSignUpRequest;
 import com.woojin.userdemo.user.dto.UserSignUpResponse;
+import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,19 @@ public class UserController {
             return ResponseEntity.ok(new UserGetResponse(user));
         } catch (UserNotFoundException err) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", err.getMessage()));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity getMine(Authentication authentication) {
+        try {
+            User user = userService.getByAuthentication(authentication);
+
+            return ResponseEntity.ok(new UserGetResponse(user));
+        } catch (UnauthorizedException unauthorizedException) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Cannot read current authentication"));
+        } catch (UserNotFoundException userNotFoundException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "Cannot found user with current authentication"));
         }
     }
 
@@ -66,4 +82,5 @@ public class UserController {
             );
         }
     }
+
 }

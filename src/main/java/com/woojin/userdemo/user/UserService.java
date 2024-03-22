@@ -1,7 +1,10 @@
 package com.woojin.userdemo.user;
 
+import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,20 @@ public class UserService {
         } else {
             throw new UserNotFoundException("User with ID " + id + " not found.");
         }
+    }
+
+    public User getByAuthentication(Authentication authentication) {
+        if(authentication == null) {
+            throw new UnauthorizedException("User authentication is null");
+        }
+
+        User user = (User) authentication.getPrincipal();
+
+        if (user == null) {
+            throw new UserNotFoundException("Cannot found user with current authentication");
+        }
+
+        return user;
     }
 
     public User create(String username, String email, String password) {
