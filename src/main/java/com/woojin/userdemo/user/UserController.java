@@ -10,6 +10,11 @@ import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +37,10 @@ public class UserController {
     @GetMapping("/{userId}")
     @Operation(summary = "id가 userId인 유저 한 명을 조회합니다")
     @Parameter(name = "userId", description = "조회할 유저의 id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공. 조회한 유저 정보를 응답", content = @Content(schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "404", description = "입력한 id를 가진 유저가 존재하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity getById(@PathVariable Long userId) {
         try {
             User user = userService.getById(userId);

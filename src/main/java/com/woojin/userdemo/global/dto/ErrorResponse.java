@@ -1,5 +1,6 @@
 package com.woojin.userdemo.global.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatusCode;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@Schema
 public class ErrorResponse {
     private int status;
     private List<ApiError> errors;
