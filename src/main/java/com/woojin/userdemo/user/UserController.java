@@ -18,24 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/signup")
-    public String signup(UserCreateRequest userCreateDto) {
-        return "signup_form";
-    }
-
     @PostMapping("/signup")
-    public ResponseEntity signup(@Valid UserCreateRequest userCreateDto, BindingResult bindingResult) {
+    public ResponseEntity signup(@Valid UserCreateRequest userCreateRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
-        if(!userCreateDto.getPassword().equals(userCreateDto.getPasswordConfirm())) {
+        if(!userCreateRequest.getPassword().equals(userCreateRequest.getPasswordConfirm())) {
             bindingResult.rejectValue("passwordConfirm", "PASSWORD_INCORRECT", "Password confirmation does not match");
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
         try {
-            userService.create(userCreateDto.getUsername(), userCreateDto.getEmail(), userCreateDto.getPassword());
+            userService.create(userCreateRequest.getUsername(), userCreateRequest.getEmail(), userCreateRequest.getPassword());
         } catch(DataIntegrityViolationException err) {
             err.printStackTrace();
             bindingResult.reject("SIGN_UP_FAILED", "User already exists");

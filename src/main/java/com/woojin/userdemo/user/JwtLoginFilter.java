@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woojin.userdemo.global.dto.ApiError;
 import com.woojin.userdemo.global.dto.ErrorResponse;
 import com.woojin.userdemo.user.dto.UserLoginRequest;
 import com.woojin.userdemo.user.dto.UserLoginResponse;
@@ -20,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final UserConfigProperties userConfigProperties;
@@ -84,7 +86,11 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "INVALID_USERNAME_OR_PASSWORD", failed.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                Arrays.asList(
+                new ApiError( "INVALID_USERNAME_OR_PASSWORD", failed.getMessage())
+        ));
 
         new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
     }

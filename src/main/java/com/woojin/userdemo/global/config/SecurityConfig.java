@@ -24,7 +24,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] ALLOW_URLS = {
-            "/login",
+            "/user/login",
             "/user/signup",
             "/v3/api-docs/**",
             "/swagger-ui/**"
@@ -44,6 +44,7 @@ public class SecurityConfig {
         JwtLoginFilter jwtLoginFilter = new JwtLoginFilter(authenticationManager, userConfigProperties);
         jwtLoginFilter.setUsernameParameter("username");
         jwtLoginFilter.setPasswordParameter("password");
+        jwtLoginFilter.setFilterProcessesUrl("/user/login");
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
