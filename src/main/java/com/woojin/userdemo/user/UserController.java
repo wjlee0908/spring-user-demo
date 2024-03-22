@@ -2,25 +2,37 @@ package com.woojin.userdemo.user;
 
 import com.woojin.userdemo.global.dto.ApiError;
 import com.woojin.userdemo.global.dto.ErrorResponse;
+import com.woojin.userdemo.user.dto.UserGetResponse;
 import com.woojin.userdemo.user.dto.UserSignUpRequest;
 import com.woojin.userdemo.user.dto.UserSignUpResponse;
+import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
     private final UserService userService;
+
+    @GetMapping("/{userId}")
+    public ResponseEntity getById(@PathVariable Long userId) {
+        try {
+            User user = userService.getById(userId);
+
+            return ResponseEntity.ok(new UserGetResponse(user));
+        } catch (UserNotFoundException err) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", err.getMessage()));
+        }
+    }
 
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid UserSignUpRequest userSignUpRequest, BindingResult bindingResult) {
