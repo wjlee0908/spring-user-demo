@@ -38,6 +38,11 @@ dependencies {
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // Spring Session
+    implementation 'org.springframework.session:spring-session-data-redis'
 }
 
 tasks.named('test') {
