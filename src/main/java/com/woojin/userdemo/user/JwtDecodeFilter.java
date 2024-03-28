@@ -20,9 +20,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 /**
+ * @deprecated
+ *
  * 로그인이 성공한 사용자에게 받은 JWT를 해석해서 어떤 유저가 서버에 접근했는 지 파악한다
  * 요청 당 한 번만 확인하면 되므로, `OncePerRequestFilter`를 상속 받아 구현
  */
+@Deprecated
 @Component
 @RequiredArgsConstructor
 public class JwtDecodeFilter extends OncePerRequestFilter {

@@ -1,9 +1,6 @@
 package com.woojin.userdemo.global.config;
 
-import com.woojin.userdemo.user.JwtDecodeFilter;
-import com.woojin.userdemo.user.JwtLoginFilter;
-import com.woojin.userdemo.user.UserConfigProperties;
-import com.woojin.userdemo.user.UserDetailsServiceImpl;
+import com.woojin.userdemo.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -26,11 +24,11 @@ public class SecurityConfig {
     private static final String[] ALLOW_URLS = {
             "/users/login",
             "/users/signup",
+            "/error",
             "/v3/api-docs/**",
             "/swagger-ui/**"
     };
 
-    private final JwtDecodeFilter jwtDecodeFilter;
     private final UserDetailsServiceImpl userDetailsService;
     private final UserConfigProperties userConfigProperties;
 
@@ -41,10 +39,10 @@ public class SecurityConfig {
         authenticationManagerBuilder.userDetailsService(userDetailsService);
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
-        JwtLoginFilter jwtLoginFilter = new JwtLoginFilter(authenticationManager, userConfigProperties);
-        jwtLoginFilter.setUsernameParameter("username");
-        jwtLoginFilter.setPasswordParameter("password");
-        jwtLoginFilter.setFilterProcessesUrl("/users/login");
+        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager);
+        sessionLoginFilter.setUsernameParameter("username");
+        sessionLoginFilter.setPasswordParameter("password");
+        sessionLoginFilter.setFilterProcessesUrl("/users/login");
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -54,12 +52,8 @@ public class SecurityConfig {
                 .requestMatchers(ALLOW_URLS).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .sessionManagement((sessionManagement) ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
                 .authenticationManager(authenticationManager)
-                .addFilterBefore(jwtDecodeFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(jwtLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

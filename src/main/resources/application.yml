@@ -24,6 +24,17 @@ spring:
     redis:
       namespace: user-demo:session
 
+server:
+  servlet:
+    session:
+      cookie: # 쿠키 속성 지정
+        path: / # 적용될 경로. 모든 경로에 지정
+        name: JSESSIONID
+        http-only: true # 브라우저에 쿠키에 대한 JS 접근 제한. XSS 공격 방지
+        secure: true # 쿠키가 HTTPS(SSL/TLS) 연결을 통해서만 전송
+        timeout: 3600 # 세션의 유효 시간. 단위는 초
+        domain: user-demo.com # 유효 도메인
+
 springdoc:
   packages-to-scan: com.woojin.userdemo
   default-consumes-media-type: application/json;charset=UTF-8
@@ -32,3 +43,7 @@ springdoc:
 user:
   jwt-secret: ${USER_JWT_SECRET}
   jwt-issuer: ${USER_JWT_ISSUER}
+
+logging:
+  level:
+    root: trace
