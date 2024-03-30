@@ -17,6 +17,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -55,18 +57,27 @@ public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
             User user = (User) authResult.getPrincipal();
 
             HttpSession session = request.getSession();
-            session.setMaxInactiveInterval(60 * 60); // 세션 유효 시간
-            session.setAttribute("user", user); // 인증된 사용자 정보를 세션에 저장
+            session.invalidate();
 
-            Cookie cookie = new Cookie("JSESSIONID", session.getId());
+            HttpSession newSession = request.getSession(true);
+            newSession.setMaxInactiveInterval(60 * 60); // 세션 유효 시간
+            newSession.setAttribute("user", user); // 인증된 사용자 정보를 세션에 저장
+
+            Cookie cookie = new Cookie("JSESSIONID", newSession.getId());
             cookie.setPath("/");
             response.addCookie(cookie);
 
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(authResult);
+            SecurityContextHolder.setContext(context);
+
             UserResponse userLoginResponse = new UserResponse(user);
             new ObjectMapper().writeValue(response.getOutputStream(), userLoginResponse);
-        } catch (JWTCreationException | IOException exception) {
+        } catch (IOException exception) {
             exception.printStackTrace();
         }
+
+        chain.doFilter(request, response);
     }
 
     @Override

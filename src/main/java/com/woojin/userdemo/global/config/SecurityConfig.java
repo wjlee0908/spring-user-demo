@@ -7,18 +7,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.ui.DefaultLoginPageGeneratingFilter;
+import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.session.Session;
+import org.springframework.session.data.redis.RedisIndexedSessionRepository;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] ALLOW_URLS = {
@@ -31,6 +40,10 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final UserConfigProperties userConfigProperties;
+    private final RedisIndexedSessionRepository redisIndexedSessionRepository;
+//    private final AuthenticationEntryPoint authEntryPoint;
+    private final SessionAuthorizationFilter sessionAuthorizationFilter;
+//    private final CustomSessionFixationProtectionStrategy customSessionFixationProtectionStrategy;
 
     @Bean
     // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
@@ -43,17 +56,35 @@ public class SecurityConfig {
         sessionLoginFilter.setUsernameParameter("username");
         sessionLoginFilter.setPasswordParameter("password");
         sessionLoginFilter.setFilterProcessesUrl("/users/login");
+//        sessionLoginFilter.setSessionAuthenticationStrategy(customSessionFixationProtectionStrategy);
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeRequests()
-                .requestMatchers(ALLOW_URLS).permitAll()
-                .anyRequest().authenticated()
+                    .requestMatchers(ALLOW_URLS).permitAll()
+                    .anyRequest().authenticated()
                 .and()
+//                .formLogin(formLogin -> formLogin
+//                        .loginProcessingUrl("/users/login")
+//                        .usernameParameter("username")
+//                        .passwordParameter("password")
+//                        .defaultSuccessUrl("/users/me")
+//                        .permitAll()
+//                )
+//                .securityContext(securityContext -> securityContext
+//                        .securityContextRepository(new HttpSessionSecurityContextRepository()))
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
-                .addFilterBefore(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sessionAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
+//                .sessionManagement(sessionManagement -> sessionManagement
+//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+//                        .sessionFixation(sessionFixation -> sessionFixation.none())
+//                        .maximumSessions(maxSession)
+//                        .sessionConcurrency(sessionConcurrency -> sessionConcurrency.sessionRegistry(sessionRegistry()))
+//                )
+//                .exceptionHandling((ex) -> ex.authenticationEntryPoint(this.authEntryPoint))
                 .build();
     }
 
@@ -73,4 +104,15 @@ public class SecurityConfig {
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+    @Bean
+    public SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry() {
+        return new SpringSessionBackedSessionRegistry<>(this.redisIndexedSessionRepository);
+    }
+
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
+
 }

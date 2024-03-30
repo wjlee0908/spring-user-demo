@@ -26,7 +26,7 @@ import java.io.IOException;
  * 요청 당 한 번만 확인하면 되므로, `OncePerRequestFilter`를 상속 받아 구현
  */
 @Deprecated
-@Component
+//@Component
 @RequiredArgsConstructor
 public class JwtDecodeFilter extends OncePerRequestFilter {
     @Value("${user.jwt-secret}")
