@@ -61,7 +61,7 @@ public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
 
             HttpSession newSession = request.getSession(true);
             newSession.setMaxInactiveInterval(60 * 60); // 세션 유효 시간
-            newSession.setAttribute("user", user); // 인증된 사용자 정보를 세션에 저장
+            newSession.setAttribute("username", user.getUsername()); // 인증된 사용자 정보를 세션에 저장
 
             Cookie cookie = new Cookie("JSESSIONID", newSession.getId());
             cookie.setPath("/");
