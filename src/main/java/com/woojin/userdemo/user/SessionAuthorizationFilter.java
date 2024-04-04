@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,6 +13,8 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,10 +35,7 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
 
     private static final String SESSION_KEY = "JSESSIONID";
 
-    @Value("${spring.session.redis.namespace}")
-    private String namespace;
-
-    private final StringRedisTemplate redisTemplate;
+    private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
@@ -48,10 +48,8 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
         }
 
         try {
-            String key = namespace + ":sessions:" + sessionId;
-            String redisUsername = (String) redisTemplate.opsForHash().get(key,"sessionAttr:username");
-            byte[] decodedBytes = Base64.getDecoder().decode(redisUsername);
-            String username = new String(decodedBytes);
+            Session session = sessionRepository.findById(sessionId);
+            String username = session.getAttribute("username");
 
             if (isNull(username)) {
                 logger.warn("Session Cookie exist, but Session in Storage is not exist");
