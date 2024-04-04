@@ -40,6 +40,7 @@ public class SecurityConfig {
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
     private final SessionRefreshFilter sessionRefreshFilter;
     private final SessionUtils sessionUtils;
+    private final LogoutHandlerImpl logoutHandler;
 
     @Bean
     // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
@@ -62,6 +63,10 @@ public class SecurityConfig {
                 .and()
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
+                .logout(logout -> logout.logoutUrl("/users/logout")
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler(logoutHandler)
+                )
                 .addFilterBefore(sessionAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(sessionRefreshFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
