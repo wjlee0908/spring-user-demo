@@ -1,6 +1,8 @@
 package com.woojin.userdemo.global.config;
 
-import com.woojin.userdemo.user.*;
+import com.woojin.userdemo.user.SessionAuthorizationFilter;
+import com.woojin.userdemo.user.SessionLoginFilter;
+import com.woojin.userdemo.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,14 +13,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.session.Session;
@@ -39,11 +38,8 @@ public class SecurityConfig {
     };
 
     private final UserDetailsServiceImpl userDetailsService;
-    private final UserConfigProperties userConfigProperties;
     private final RedisIndexedSessionRepository redisIndexedSessionRepository;
-//    private final AuthenticationEntryPoint authEntryPoint;
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
-//    private final CustomSessionFixationProtectionStrategy customSessionFixationProtectionStrategy;
 
     @Bean
     // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
@@ -56,7 +52,6 @@ public class SecurityConfig {
         sessionLoginFilter.setUsernameParameter("username");
         sessionLoginFilter.setPasswordParameter("password");
         sessionLoginFilter.setFilterProcessesUrl("/users/login");
-//        sessionLoginFilter.setSessionAuthenticationStrategy(customSessionFixationProtectionStrategy);
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -65,26 +60,16 @@ public class SecurityConfig {
                     .requestMatchers(ALLOW_URLS).permitAll()
                     .anyRequest().authenticated()
                 .and()
-//                .formLogin(formLogin -> formLogin
-//                        .loginProcessingUrl("/users/login")
-//                        .usernameParameter("username")
-//                        .passwordParameter("password")
-//                        .defaultSuccessUrl("/users/me")
-//                        .permitAll()
-//                )
-//                .securityContext(securityContext -> securityContext
-//                        .securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
                 .addFilterBefore(sessionAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
 //                .sessionManagement(sessionManagement -> sessionManagement
 //                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-//                        .sessionFixation(sessionFixation -> sessionFixation.none())
-//                        .maximumSessions(maxSession)
+//                        .sessionFixation(sessionFixation -> sessionFixation.newSession())
+//                        .maximumSessions(100)
 //                        .sessionConcurrency(sessionConcurrency -> sessionConcurrency.sessionRegistry(sessionRegistry()))
 //                )
-//                .exceptionHandling((ex) -> ex.authenticationEntryPoint(this.authEntryPoint))
                 .build();
     }
 

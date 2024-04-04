@@ -1,15 +1,12 @@
 package com.woojin.userdemo.user;
 
+import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +17,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Optional;
 
 import static java.util.Objects.isNull;
@@ -49,14 +45,15 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
 
         try {
             Session session = sessionRepository.findById(sessionId);
-            String username = session.getAttribute("username");
 
-            if (isNull(username)) {
-                logger.warn("Session Cookie exist, but Session in Storage is not exist");
-//            throw new UnauthorizedException("User session not found");
+            if (isNull(session)) {
+                logger.warn("Session cookie exists, but the corresponding session does not exist in storage");
+                throw new UnauthorizedException("User session not found");
             }
 
+            String username = session.getAttribute("username");
             User user = (User) userDetailsService.loadUserByUsername(username);
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (Exception exception) {
