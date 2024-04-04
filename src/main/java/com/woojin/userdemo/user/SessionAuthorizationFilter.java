@@ -1,6 +1,5 @@
 package com.woojin.userdemo.user;
 
-import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -28,8 +27,9 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SessionAuthorizationFilter extends OncePerRequestFilter {
-    private final UserDetailsServiceImpl userDetailsService;
+
     private final SessionUtils sessionUtils;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -40,7 +40,16 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
+        if(session.isExpired()) {
+            sessionUtils.deleteById(session.getId());
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
+            request.setAttribute("session", session);
+
             String username = session.getAttribute("username");
             User user = (User) userDetailsService.loadUserByUsername(username);
 

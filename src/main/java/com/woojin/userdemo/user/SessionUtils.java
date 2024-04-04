@@ -40,4 +40,8 @@ public class SessionUtils {
 
         return sessionCookie.get().getValue();
     }
+
+    public void deleteById(String id) {
+        this.sessionRepository.deleteById(id);
+    }
 }
