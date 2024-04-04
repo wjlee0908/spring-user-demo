@@ -29,7 +29,7 @@ public class SessionRefreshFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Session session = sessionUtils.getCurrentOne(request);
 
-        if(isNull(session)) {
+        if (isNull(session)) {
             filterChain.doFilter(request, response);
             return;
         }

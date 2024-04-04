@@ -30,12 +30,12 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Session session = sessionUtils.findFromRepository(request);
 
-        if(isNull(session)) {
+        if (isNull(session)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        if(session.isExpired()) {
+        if (session.isExpired()) {
             this.sessionUtils.invalidate(session);
 
             filterChain.doFilter(request, response);

@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Component;
@@ -18,9 +17,8 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SessionUtils {
+    private static final String REQUEST_ATTRIBUTE_KEY = "session";
     public static String COOKIE_KEY = "JSESSIONID";
-    private static String REQUEST_ATTRIBUTE_KEY = "session";
-
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
     /**
@@ -28,7 +26,7 @@ public class SessionUtils {
      */
     public HttpSession create(HttpServletRequest request, String username) {
         HttpSession session = request.getSession(false);
-        if(!isNull(session)) {
+        if (!isNull(session)) {
             session.invalidate();
         }
 
@@ -53,7 +51,7 @@ public class SessionUtils {
     public Session findFromRepository(HttpServletRequest request) {
         String sessionId = this.findIdFromCookie(request);
 
-        if(isNull(sessionId)) {
+        if (isNull(sessionId)) {
             return null;
         }
 
@@ -64,7 +62,7 @@ public class SessionUtils {
     public Session findFromRepository(HttpSession httpSession) {
         String sessionId = httpSession.getId();
 
-        if(isNull(sessionId)) {
+        if (isNull(sessionId)) {
             return null;
         }
 
@@ -79,7 +77,7 @@ public class SessionUtils {
         Cookie[] cookies = request.getCookies();
         Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SessionUtils.COOKIE_KEY)).findFirst();
 
-        if(!sessionCookie.isPresent()) {
+        if (!sessionCookie.isPresent()) {
             return null;
         }
 

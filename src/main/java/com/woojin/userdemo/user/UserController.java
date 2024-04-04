@@ -11,7 +11,6 @@ import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -74,17 +73,17 @@ public class UserController {
             ));
         }
 
-        if(!userService.isPasswordMatchingConfirmation(request.getPassword(), request.getPasswordConfirm())) {
+        if (!userService.isPasswordMatchingConfirmation(request.getPassword(), request.getPasswordConfirm())) {
             return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "PASSWORD_INCORRECT", "Password confirmation does not match"));
         }
 
         try {
             User user = userService.create(request.getUsername(), request.getEmail(), request.getPassword());
             UserSignUpResponse userSignUpResponse = new UserSignUpResponse(
-                user.getId(), user.getUsername(), user.getEmail()
+                    user.getId(), user.getUsername(), user.getEmail()
             );
             return ResponseEntity.ok(userSignUpResponse);
-        } catch(DataIntegrityViolationException err) {
+        } catch (DataIntegrityViolationException err) {
             err.printStackTrace();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(
                     new ErrorResponse(HttpStatus.CONFLICT.value(), "USER_ALREADY_EXISTS", "User already exists")
@@ -102,8 +101,8 @@ public class UserController {
         try {
             User user = userService.getByAuthentication(authentication);
 
-            if(request.getPassword() != null
-               && !userService.isPasswordMatchingConfirmation(request.getPassword(), request.getPasswordConfirm())) {
+            if (request.getPassword() != null
+                    && !userService.isPasswordMatchingConfirmation(request.getPassword(), request.getPasswordConfirm())) {
                 return ResponseEntity.badRequest().body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "PASSWORD_INCORRECT", "Password confirmation does not match"));
             }
 

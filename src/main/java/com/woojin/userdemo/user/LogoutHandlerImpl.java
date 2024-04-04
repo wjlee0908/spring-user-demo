@@ -11,7 +11,6 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.session.Session;
 import org.springframework.stereotype.Component;
 
-import javax.imageio.IIOException;
 import java.io.IOException;
 
 import static java.util.Objects.isNull;
@@ -24,14 +23,14 @@ public class LogoutHandlerImpl implements LogoutHandler, LogoutSuccessHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         Session session = sessionUtils.getCurrentOne(request);
-        if(!isNull(session)) {
+        if (!isNull(session)) {
             sessionUtils.invalidate(session);
         }
 
         Cookie sessionCookie = new Cookie(SessionUtils.COOKIE_KEY, null);
         sessionCookie.setMaxAge(0);
         response.addCookie(sessionCookie);
-}
+    }
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {

@@ -5,9 +5,6 @@ import com.woojin.userdemo.user.exceptions.UserNotFoundException;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +19,7 @@ public class UserService {
     public User getById(Long id) {
         Optional<User> userOptional = userRepository.findById(id);
 
-        if(userOptional.isPresent()) {
+        if (userOptional.isPresent()) {
             return userOptional.get();
         } else {
             throw new UserNotFoundException("User with ID " + id + " not found.");
@@ -30,7 +27,7 @@ public class UserService {
     }
 
     public User getByAuthentication(Authentication authentication) {
-        if(authentication == null) {
+        if (authentication == null) {
             throw new UnauthorizedException("User authentication is null");
         }
 
@@ -60,11 +57,11 @@ public class UserService {
     public User update(Long id, @Email String email, String password) {
         User user = this.getById(id);
 
-        if(email != null) {
+        if (email != null) {
             user.setEmail(email);
         }
 
-        if(password != null) {
+        if (password != null) {
             user.setPassword(passwordEncoder.encode(password));
         }
 

@@ -1,17 +1,14 @@
 package com.woojin.userdemo.user;
 
-import com.auth0.jwt.exceptions.JWTCreationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woojin.userdemo.global.dto.ErrorResponse;
 import com.woojin.userdemo.user.dto.UserLoginRequest;
 import com.woojin.userdemo.user.dto.UserResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,8 +21,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
-import static java.util.Objects.isNull;
 
 @Component
 public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
