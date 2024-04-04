@@ -1,6 +1,5 @@
 package com.woojin.userdemo.user.dto;
 
-import com.woojin.userdemo.user.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;

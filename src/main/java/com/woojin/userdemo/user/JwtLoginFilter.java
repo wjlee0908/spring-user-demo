@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.woojin.userdemo.global.dto.ApiError;
 import com.woojin.userdemo.global.dto.ErrorResponse;
 import com.woojin.userdemo.user.dto.UserLoginRequest;
 import com.woojin.userdemo.user.dto.UserLoginResponse;
@@ -21,7 +20,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 /**
  * @deprecated

@@ -1,23 +1,18 @@
 package com.woojin.userdemo.user;
 
-import com.woojin.userdemo.user.exceptions.UnauthorizedException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
 
 import static java.util.Objects.isNull;
 
@@ -28,28 +23,27 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SessionAuthorizationFilter extends OncePerRequestFilter {
-
-    private static final String SESSION_KEY = "JSESSIONID";
-
-    private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SessionUtils sessionUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String sessionId = this.getSessionId(request);
+        Session session = sessionUtils.findFromRepository(request);
 
-        if(isNull(sessionId)) {
+        if (isNull(session)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (session.isExpired()) {
+            this.sessionUtils.invalidate(session);
+
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            Session session = sessionRepository.findById(sessionId);
-
-            if (isNull(session)) {
-                logger.warn("Session cookie exists, but the corresponding session does not exist in storage");
-                throw new UnauthorizedException("User session not found");
-            }
+            sessionUtils.addToRequest(session, request);
 
             String username = session.getAttribute("username");
             User user = (User) userDetailsService.loadUserByUsername(username);
@@ -61,16 +55,5 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String getSessionId(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SESSION_KEY)).findFirst();
-
-        if(!sessionCookie.isPresent()) {
-            return null;
-        }
-
-        return sessionCookie.get().getValue();
     }
 }

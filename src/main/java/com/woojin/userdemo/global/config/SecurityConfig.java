@@ -1,8 +1,6 @@
 package com.woojin.userdemo.global.config;
 
-import com.woojin.userdemo.user.SessionAuthorizationFilter;
-import com.woojin.userdemo.user.SessionLoginFilter;
-import com.woojin.userdemo.user.UserDetailsServiceImpl;
+import com.woojin.userdemo.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +38,9 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final RedisIndexedSessionRepository redisIndexedSessionRepository;
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
+    private final SessionRefreshFilter sessionRefreshFilter;
+    private final SessionUtils sessionUtils;
+    private final LogoutHandlerImpl logoutHandler;
 
     @Bean
     // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
@@ -48,7 +49,7 @@ public class SecurityConfig {
         authenticationManagerBuilder.userDetailsService(userDetailsService);
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
-        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager);
+        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager, sessionUtils);
         sessionLoginFilter.setUsernameParameter("username");
         sessionLoginFilter.setPasswordParameter("password");
         sessionLoginFilter.setFilterProcessesUrl("/users/login");
@@ -62,7 +63,12 @@ public class SecurityConfig {
                 .and()
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
+                .logout(logout -> logout.logoutUrl("/users/logout")
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler(logoutHandler)
+                )
                 .addFilterBefore(sessionAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sessionRefreshFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
 //                .sessionManagement(sessionManagement -> sessionManagement
 //                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)

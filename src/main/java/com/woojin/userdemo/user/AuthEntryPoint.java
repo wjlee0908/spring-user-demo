@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
@@ -19,7 +18,7 @@ import static java.util.Objects.isNull;
  * allows us to use the same exception handling across the application
  * For better understanding visit below
  * <a href="https://www.baeldung.com/spring-security-exceptionhandler#:~:text=Spring%20security%20exceptions%20can%20be,a%20custom%20implementation%20of%20AuthenticationEntryPoint">...</a>.
- * */
+ */
 //@Component(value = "authEntryPoint")
 public class AuthEntryPoint implements AuthenticationEntryPoint {
     private final HandlerExceptionResolver resolver;
@@ -32,7 +31,7 @@ public class AuthEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        if(!isNull(authException)) {
+        if (!isNull(authException)) {
             authException.printStackTrace();
         }
 
