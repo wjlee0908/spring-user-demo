@@ -27,13 +27,14 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SessionAuthorizationFilter extends OncePerRequestFilter {
+    private static final String SESSION_KEY = "JSESSIONID";
 
-    private final SessionUtils sessionUtils;
+    private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Session session = sessionUtils.getByRequest(request);
+        Session session = this.getSession(request);
 
         if(isNull(session)) {
             filterChain.doFilter(request, response);
@@ -41,7 +42,7 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
         }
 
         if(session.isExpired()) {
-            sessionUtils.deleteById(session.getId());
+            this.sessionRepository.deleteById(session.getId());
 
             filterChain.doFilter(request, response);
             return;
@@ -60,5 +61,27 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    public Session getSession(HttpServletRequest request) {
+        String sessionId = this.getSessionId(request);
+
+        if(isNull(sessionId)) {
+            return null;
+        }
+
+        Session session = sessionRepository.findById(sessionId);
+        return session;
+    }
+
+    private String getSessionId(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SESSION_KEY)).findFirst();
+
+        if(!sessionCookie.isPresent()) {
+            return null;
+        }
+
+        return sessionCookie.get().getValue();
     }
 }
