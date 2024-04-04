@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,14 @@ public class SessionUtils {
     }
 
     /**
+     * 주어진 session과 같은 정보를 가진 session을 생성합니다
+     */
+    public HttpSession create(HttpServletRequest request, Session session) {
+        String username = session.getAttribute("username");
+        return this.create(request, username);
+    }
+
+    /**
      * request cookie의 SESSION_KEY를 이용해서 repository에서 session을 fetch합니다.
      */
     public Session findFromRepository(HttpServletRequest request) {
@@ -52,6 +61,16 @@ public class SessionUtils {
         return session;
     }
 
+    public Session findFromRepository(HttpSession httpSession) {
+        String sessionId = httpSession.getId();
+
+        if(isNull(sessionId)) {
+            return null;
+        }
+
+        Session session = sessionRepository.findById(sessionId);
+        return session;
+    }
 
     /**
      * request의 cookie에서 session id를 찾습니다

@@ -17,23 +17,27 @@ import static java.util.Objects.isNull;
 
 /**
  * 세션 갱신 필터
- * 요청이 있을 때 마다 요청의 세션 만료 시간을 갱신합니다
+ * 요청이 있을 때 마다 세션 ID를 갱신합니다 (새로운 세션 발급)
  */
 @Component
 @RequiredArgsConstructor
 public class SessionRefreshFilter extends OncePerRequestFilter {
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
+    private final SessionUtils sessionUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Session session = (Session) request.getAttribute("session");
+        Session session = sessionUtils.getCurrentOne(request);
 
         if(isNull(session)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-//        Session newSession = request.getSession(true);
+        HttpSession newHttpSession = sessionUtils.create(request, session);
+        sessionUtils.invalidate(session);
 
+        sessionUtils.addToResponse(newHttpSession, response);
+        filterChain.doFilter(request, response);
     }
 }

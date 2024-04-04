@@ -1,9 +1,6 @@
 package com.woojin.userdemo.global.config;
 
-import com.woojin.userdemo.user.SessionAuthorizationFilter;
-import com.woojin.userdemo.user.SessionLoginFilter;
-import com.woojin.userdemo.user.SessionUtils;
-import com.woojin.userdemo.user.UserDetailsServiceImpl;
+import com.woojin.userdemo.user.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +38,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final RedisIndexedSessionRepository redisIndexedSessionRepository;
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
+    private final SessionRefreshFilter sessionRefreshFilter;
     private final SessionUtils sessionUtils;
 
     @Bean
@@ -65,6 +63,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
                 .addFilterBefore(sessionAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(sessionRefreshFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(sessionLoginFilter, UsernamePasswordAuthenticationFilter.class)
 //                .sessionManagement(sessionManagement -> sessionManagement
 //                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
