@@ -2,6 +2,7 @@ package com.woojin.userdemo.global.config;
 
 import com.woojin.userdemo.user.SessionAuthorizationFilter;
 import com.woojin.userdemo.user.SessionLoginFilter;
+import com.woojin.userdemo.user.SessionUtils;
 import com.woojin.userdemo.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final RedisIndexedSessionRepository redisIndexedSessionRepository;
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
+    private final SessionUtils sessionUtils;
 
     @Bean
     // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
@@ -48,7 +50,7 @@ public class SecurityConfig {
         authenticationManagerBuilder.userDetailsService(userDetailsService);
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
-        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager);
+        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager, sessionUtils);
         sessionLoginFilter.setUsernameParameter("username");
         sessionLoginFilter.setPasswordParameter("password");
         sessionLoginFilter.setFilterProcessesUrl("/users/login");

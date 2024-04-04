@@ -27,8 +27,6 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SessionAuthorizationFilter extends OncePerRequestFilter {
-    private static final String SESSION_KEY = "JSESSIONID";
-
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
     private final UserDetailsServiceImpl userDetailsService;
 
@@ -76,7 +74,7 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
 
     private String getSessionId(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SESSION_KEY)).findFirst();
+        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SessionUtils.SESSION_KEY)).findFirst();
 
         if(!sessionCookie.isPresent()) {
             return null;

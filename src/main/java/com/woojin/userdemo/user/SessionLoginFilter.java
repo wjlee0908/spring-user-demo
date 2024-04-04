@@ -11,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,15 +21,21 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+import static java.util.Objects.isNull;
+
+@Component
 public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
+    private final SessionUtils sessionUtils;
 
-    public SessionLoginFilter(AuthenticationManager authenticationManager) {
+    public SessionLoginFilter(AuthenticationManager authenticationManager, SessionUtils sessionUtils) {
         super(authenticationManager);
         this.authenticationManager = authenticationManager;
+        this.sessionUtils = sessionUtils;
     }
 
     @Override
@@ -56,16 +63,8 @@ public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             User user = (User) authResult.getPrincipal();
 
-            HttpSession session = request.getSession();
-            session.invalidate();
-
-            HttpSession newSession = request.getSession(true);
-            newSession.setMaxInactiveInterval(60 * 60); // 세션 유효 시간
-            newSession.setAttribute("username", user.getUsername()); // 인증된 사용자 정보를 세션에 저장
-
-            Cookie cookie = new Cookie("JSESSIONID", newSession.getId());
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            HttpSession newSession = sessionUtils.create(request, user.getUsername());
+            sessionUtils.addToResponse(newSession, response);
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authResult);
