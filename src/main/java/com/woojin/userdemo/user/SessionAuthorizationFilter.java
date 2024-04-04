@@ -28,29 +28,19 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class SessionAuthorizationFilter extends OncePerRequestFilter {
-
-    private static final String SESSION_KEY = "JSESSIONID";
-
-    private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
     private final UserDetailsServiceImpl userDetailsService;
+    private final SessionUtils sessionUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String sessionId = this.getSessionId(request);
+        Session session = sessionUtils.getByRequest(request);
 
-        if(isNull(sessionId)) {
+        if(isNull(session)) {
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            Session session = sessionRepository.findById(sessionId);
-
-            if (isNull(session)) {
-                logger.warn("Session cookie exists, but the corresponding session does not exist in storage");
-                throw new UnauthorizedException("User session not found");
-            }
-
             String username = session.getAttribute("username");
             User user = (User) userDetailsService.loadUserByUsername(username);
 
@@ -61,16 +51,5 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String getSessionId(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SESSION_KEY)).findFirst();
-
-        if(!sessionCookie.isPresent()) {
-            return null;
-        }
-
-        return sessionCookie.get().getValue();
     }
 }
