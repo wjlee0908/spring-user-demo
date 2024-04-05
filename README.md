@@ -15,7 +15,8 @@ efficient way to authenticate users within a Spring-based application.
 - JWT authentication
     - `feature/BT-38/jwt-login` branch
 - Session authentication
-    - with session information stored in Redis
+    - With session information stored in Redis
+    - Session refresh
 - Logging using `log4j2`
 
 ### Technologies Used
