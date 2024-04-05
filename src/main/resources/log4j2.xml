@@ -33,41 +33,18 @@
             </DefaultRolloverStrategy>
         </RollingFile>
 
-
-        <RollingFile name="daily_error"
-                     fileName="${logPath}/error/error.log"
-                     filePattern="${logPath}/error/error.%d{yyyy-MM-dd}.log">
-            <PatternLayout pattern="${fileLayout}"/>
-            <!--LevelRangeFilter필터를 사용할때에 단일 level의 필터만 허용한다. -->
-            <LevelRangeFilter minLevel="WARN" maxLevel="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
-            <Policies>
-                <SizeBasedTriggeringPolicy size="20 MB"/>
-            </Policies>
-            <DefaultRolloverstrategy>
-                <Delete basePath="/logs" maxDepth="3">
-                    <IfLastModified age="10d"/>
-                </Delete>
-            </DefaultRolloverstrategy>
-        </RollingFile>
-
-
     </Appenders>
 
     <!--TRACE > DEBUG > INFO > WARN > ERROR > FATAL -->
     <!--Log가 찍힐 대상 설정.-->
     <Loggers>
-        <!-- 스프링 프레임워크에서 찍는건 level을 info로 설정 -->
-        <logger name="org.springframework" level="info" additivity="false">
+        <logger name="com.woojin.userdemo" level="debug" additivity="true">
             <AppenderRef ref="console"/>
-            <AppenderRef ref="file"/>
         </logger>
 
-        <!-- rolling file에는 debug, console에는 info 분리하여 처리 가능하다. -->
-        <logger name="com.woojin.userdemo" level="warn" additivity="true">
-            <AppenderRef ref="daily_error"/>
-        </logger>
-
-        <!-- ROOT logger-->
-        <Root level="info"></Root>
+        <Root level="warn">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="file" level="error"/>
+        </Root>
     </Loggers>
 </Configuration>
