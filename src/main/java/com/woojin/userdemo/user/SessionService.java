@@ -16,7 +16,7 @@ import static java.util.Objects.isNull;
 
 @Component
 @RequiredArgsConstructor
-public class SessionUtils {
+public class SessionService {
     private static final String REQUEST_ATTRIBUTE_KEY = "session";
     public static String COOKIE_KEY = "JSESSIONID";
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
@@ -75,7 +75,7 @@ public class SessionUtils {
      */
     private String findIdFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SessionUtils.COOKIE_KEY)).findFirst();
+        Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SessionService.COOKIE_KEY)).findFirst();
 
         if (!sessionCookie.isPresent()) {
             return null;

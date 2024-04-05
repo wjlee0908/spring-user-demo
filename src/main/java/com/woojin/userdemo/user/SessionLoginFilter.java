@@ -25,12 +25,12 @@ import java.io.IOException;
 @Component
 public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
-    private final SessionUtils sessionUtils;
+    private final SessionService sessionService;
 
-    public SessionLoginFilter(AuthenticationManager authenticationManager, SessionUtils sessionUtils) {
+    public SessionLoginFilter(AuthenticationManager authenticationManager, SessionService sessionService) {
         super(authenticationManager);
         this.authenticationManager = authenticationManager;
-        this.sessionUtils = sessionUtils;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -58,8 +58,8 @@ public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             User user = (User) authResult.getPrincipal();
 
-            HttpSession newSession = sessionUtils.create(request, user.getUsername());
-            sessionUtils.addToResponse(newSession, response);
+            HttpSession newSession = sessionService.create(request, user.getUsername());
+            sessionService.addToResponse(newSession, response);
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authResult);

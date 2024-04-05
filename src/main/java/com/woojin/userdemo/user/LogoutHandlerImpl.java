@@ -18,16 +18,16 @@ import static java.util.Objects.isNull;
 @Component
 @RequiredArgsConstructor
 public class LogoutHandlerImpl implements LogoutHandler, LogoutSuccessHandler {
-    private final SessionUtils sessionUtils;
+    private final SessionService sessionService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        Session session = sessionUtils.getCurrentOne(request);
+        Session session = sessionService.getCurrentOne(request);
         if (!isNull(session)) {
-            sessionUtils.invalidate(session);
+            sessionService.invalidate(session);
         }
 
-        Cookie sessionCookie = new Cookie(SessionUtils.COOKIE_KEY, null);
+        Cookie sessionCookie = new Cookie(SessionService.COOKIE_KEY, null);
         sessionCookie.setMaxAge(0);
         response.addCookie(sessionCookie);
     }

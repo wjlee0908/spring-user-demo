@@ -23,21 +23,21 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class SessionRefreshFilter extends OncePerRequestFilter {
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
-    private final SessionUtils sessionUtils;
+    private final SessionService sessionService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Session session = sessionUtils.getCurrentOne(request);
+        Session session = sessionService.getCurrentOne(request);
 
         if (isNull(session)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        HttpSession newHttpSession = sessionUtils.create(request, session);
-        sessionUtils.invalidate(session);
+        HttpSession newHttpSession = sessionService.create(request, session);
+        sessionService.invalidate(session);
 
-        sessionUtils.addToResponse(newHttpSession, response);
+        sessionService.addToResponse(newHttpSession, response);
         filterChain.doFilter(request, response);
     }
 }

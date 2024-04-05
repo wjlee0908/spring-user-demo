@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -39,17 +38,17 @@ public class SecurityConfig {
     private final RedisIndexedSessionRepository redisIndexedSessionRepository;
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
     private final SessionRefreshFilter sessionRefreshFilter;
-    private final SessionUtils sessionUtils;
+    private final SessionService sessionService;
     private final LogoutHandlerImpl logoutHandler;
 
     @Bean
-    // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
+        // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userDetailsService);
         AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
 
-        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager, sessionUtils);
+        SessionLoginFilter sessionLoginFilter = new SessionLoginFilter(authenticationManager, sessionService);
         sessionLoginFilter.setUsernameParameter("username");
         sessionLoginFilter.setPasswordParameter("password");
         sessionLoginFilter.setFilterProcessesUrl("/users/login");
@@ -58,8 +57,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeRequests()
-                    .requestMatchers(ALLOW_URLS).permitAll()
-                    .anyRequest().authenticated()
+                .requestMatchers(ALLOW_URLS).permitAll()
+                .anyRequest().authenticated()
                 .and()
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authenticationManager(authenticationManager)
