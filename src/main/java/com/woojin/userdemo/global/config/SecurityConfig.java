@@ -1,6 +1,7 @@
 package com.woojin.userdemo.global.config;
 
-import com.woojin.userdemo.user.*;
+import com.woojin.userdemo.session.*;
+import com.woojin.userdemo.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +40,7 @@ public class SecurityConfig {
     private final SessionAuthorizationFilter sessionAuthorizationFilter;
     private final SessionRefreshFilter sessionRefreshFilter;
     private final SessionService sessionService;
-    private final LogoutHandlerImpl logoutHandler;
+    private final SessionLogoutHandler logoutHandler;
 
     @Bean
         // 내부적으로 SecurityFilterChain 빈을 생성하여 세부 설정

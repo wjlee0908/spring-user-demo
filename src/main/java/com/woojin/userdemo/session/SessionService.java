@@ -1,4 +1,4 @@
-package com.woojin.userdemo.user;
+package com.woojin.userdemo.session;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

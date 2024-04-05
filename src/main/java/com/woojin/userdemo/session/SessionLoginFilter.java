@@ -1,7 +1,8 @@
-package com.woojin.userdemo.user;
+package com.woojin.userdemo.session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woojin.userdemo.global.dto.ErrorResponse;
+import com.woojin.userdemo.user.User;
 import com.woojin.userdemo.user.dto.UserLoginRequest;
 import com.woojin.userdemo.user.dto.UserResponse;
 import jakarta.servlet.FilterChain;

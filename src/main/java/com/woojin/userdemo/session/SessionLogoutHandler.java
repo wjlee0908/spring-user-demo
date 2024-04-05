@@ -1,4 +1,4 @@
-package com.woojin.userdemo.user;
+package com.woojin.userdemo.session;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -17,7 +17,7 @@ import static java.util.Objects.isNull;
 
 @Component
 @RequiredArgsConstructor
-public class LogoutHandlerImpl implements LogoutHandler, LogoutSuccessHandler {
+public class SessionLogoutHandler implements LogoutHandler, LogoutSuccessHandler {
     private final SessionService sessionService;
 
     @Override

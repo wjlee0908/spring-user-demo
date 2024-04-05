@@ -1,5 +1,7 @@
-package com.woojin.userdemo.user;
+package com.woojin.userdemo.session;
 
+import com.woojin.userdemo.user.User;
+import com.woojin.userdemo.user.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
