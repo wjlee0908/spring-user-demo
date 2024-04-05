@@ -25,6 +25,8 @@ efficient way to authenticate users within a Spring-based application.
 - `Spring Session`
 - `log4j2`
 - `slf4j`
+- `Spring Boot`
+- `Spring Framework`
 
 ### Installation
 
