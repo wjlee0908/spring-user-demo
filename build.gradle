@@ -50,7 +50,7 @@ dependencies {
     implementation 'org.springframework.session:spring-session-data-redis'
 
     // log4j2
-    implementation 'org.springframework.boot:srping-boot-starter-log4j2'
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 }
 
 tasks.named('test') {

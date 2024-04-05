@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
 import org.springframework.stereotype.Component;
@@ -14,11 +15,13 @@ import java.util.Optional;
 
 import static java.util.Objects.isNull;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SessionService {
     private static final String REQUEST_ATTRIBUTE_KEY = "session";
     public static String COOKIE_KEY = "JSESSIONID";
+
     private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
     /**
@@ -33,6 +36,8 @@ public class SessionService {
         HttpSession newSession = request.getSession(true);
         newSession.setMaxInactiveInterval(60 * 60); // 세션 유효 시간
         newSession.setAttribute("username", username); // 인증된 사용자 정보를 세션에 저장
+
+        log.info("Session created - ID: " + newSession.getId() + ", Creation Time: " + newSession.getCreationTime());
 
         return newSession;
     }
@@ -109,5 +114,7 @@ public class SessionService {
 
     public void invalidate(Session session) {
         this.sessionRepository.deleteById(session.getId());
+
+        log.info("Session destroyed - ID: " + session.getId());
     }
 }
