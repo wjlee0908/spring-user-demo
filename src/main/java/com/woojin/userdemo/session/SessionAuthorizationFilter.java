@@ -1,5 +1,7 @@
-package com.woojin.userdemo.user;
+package com.woojin.userdemo.session;
 
+import com.woojin.userdemo.user.User;
+import com.woojin.userdemo.user.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,11 +26,11 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 public class SessionAuthorizationFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
-    private final SessionUtils sessionUtils;
+    private final SessionService sessionService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Session session = sessionUtils.findFromRepository(request);
+        Session session = sessionService.findFromRepository(request);
 
         if (isNull(session)) {
             filterChain.doFilter(request, response);
@@ -36,14 +38,14 @@ public class SessionAuthorizationFilter extends OncePerRequestFilter {
         }
 
         if (session.isExpired()) {
-            this.sessionUtils.invalidate(session);
+            this.sessionService.invalidate(session);
 
             filterChain.doFilter(request, response);
             return;
         }
 
         try {
-            sessionUtils.addToRequest(session, request);
+            sessionService.addToRequest(session, request);
 
             String username = session.getAttribute("username");
             User user = (User) userDetailsService.loadUserByUsername(username);

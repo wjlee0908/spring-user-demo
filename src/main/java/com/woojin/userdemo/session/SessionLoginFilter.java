@@ -1,7 +1,8 @@
-package com.woojin.userdemo.user;
+package com.woojin.userdemo.session;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woojin.userdemo.global.dto.ErrorResponse;
+import com.woojin.userdemo.user.User;
 import com.woojin.userdemo.user.dto.UserLoginRequest;
 import com.woojin.userdemo.user.dto.UserResponse;
 import jakarta.servlet.FilterChain;
@@ -25,12 +26,12 @@ import java.io.IOException;
 @Component
 public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
-    private final SessionUtils sessionUtils;
+    private final SessionService sessionService;
 
-    public SessionLoginFilter(AuthenticationManager authenticationManager, SessionUtils sessionUtils) {
+    public SessionLoginFilter(AuthenticationManager authenticationManager, SessionService sessionService) {
         super(authenticationManager);
         this.authenticationManager = authenticationManager;
-        this.sessionUtils = sessionUtils;
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -58,8 +59,8 @@ public class SessionLoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             User user = (User) authResult.getPrincipal();
 
-            HttpSession newSession = sessionUtils.create(request, user.getUsername());
-            sessionUtils.addToResponse(newSession, response);
+            HttpSession newSession = sessionService.create(request, user.getUsername());
+            sessionService.addToResponse(newSession, response);
 
             SecurityContext context = SecurityContextHolder.createEmptyContext();
             context.setAuthentication(authResult);

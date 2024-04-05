@@ -12,6 +12,11 @@ java {
 }
 
 configurations {
+    all {
+        // log4j 적용을 위해 기본 logback 로깅 종속성 제거
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    }
+
     compileOnly {
         extendsFrom annotationProcessor
     }
@@ -43,6 +48,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     // Spring Session
     implementation 'org.springframework.session:spring-session-data-redis'
+
+    // log4j2
+    implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 }
 
 tasks.named('test') {

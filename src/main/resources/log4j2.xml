@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- log4j 적용 단계에 출력할 log level -->
+<Configuration status="debug" monitorInterval="5">
+    <!-- 속성 값 정의 -->
+    <Properties>
+        <Property name="serviceName">userDemo</Property>
+        <Property name="logPath">./logs</Property>
+        <Property name="consoleLayout">[%d{yyyy-MM-dd HH:mm:ss}] [%-5p] [%c{1}:%L] - %m%n</Property>
+        <Property name="fileLayout">%d [%t] %-5level %c(%M:%L) - %m%n</Property>
+    </Properties>
+
+    <!-- Log Appender 설정 -->
+    <!-- 실제로 로그를 작성하는 객체 -->
+    <Appenders>
+        <!-- Console Log Appender -->
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${consoleLayout}"/>
+        </Console>
+        <!-- File에 Log를 작성하는 Appender -->
+        <RollingFile name="file"
+                     fileName="${logPath}/${serviceName}.log"
+                     filePattern="${logPath}/${serviceName}.%d{yyyy-MM-dd-hh}.log">
+            <PatternLayout pattern="${fileLayout}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy
+                        modulate="true"
+                        interval="1"/><!-- 시간별 로그 파일 생성-->
+            </Policies>
+            <DefaultRolloverStrategy max="5" fileIndex="min"> <!-- 롤링 파일 5개 까지 생성 -->
+                <Delete basePath="/logs" maxDepth="3">
+                    <IfLastModified age="10d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+    </Appenders>
+
+    <!--TRACE > DEBUG > INFO > WARN > ERROR > FATAL -->
+    <!--Log가 찍힐 대상 설정.-->
+    <Loggers>
+        <logger name="com.woojin.userdemo" level="debug" additivity="true">
+            <AppenderRef ref="console"/>
+        </logger>
+
+        <Root level="warn">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="file" level="error"/>
+        </Root>
+    </Loggers>
+</Configuration>
