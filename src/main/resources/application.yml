@@ -58,10 +58,13 @@ management:
     web:
       exposure:
         include: '*'
-    #        include: health, info, beans,
+  #        include: health, info, beans
   endpoint:
     health:
       show-details: always
+  #      Requires `HttpExchangeRepository` bean
+  #    httpexchanges:
+  #      enabled: true
   info:
     os:
       enabled: true
