@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.3'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'com.gorylenko.gradle-git-properties' version '2.4.1'
 }
 
 group = 'com.woojin'
@@ -51,6 +52,14 @@ dependencies {
 
     // log4j2
     implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+
+    // Spring Boot - Actutator. 모니터링.
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+}
+
+springBoot {
+    buildInfo()
 }
 
 tasks.named('test') {
