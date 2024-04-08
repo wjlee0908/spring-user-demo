@@ -18,6 +18,7 @@ efficient way to authenticate users within a Spring-based application.
     - With session information stored in Redis
     - Session refresh
 - Logging using `log4j2`
+- Sever metrics monitoring
 
 ### Technologies Used
 
