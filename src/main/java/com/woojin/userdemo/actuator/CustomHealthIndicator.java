@@ -15,8 +15,9 @@ public class CustomHealthIndicator implements HealthIndicator {
 
         // 외부 서비스를 사용 가능한 지 확인한다
 
-        return Health.outOfService().withDetail("reason", "External service is out of service")
-                .withDetail("hour", hour)
-                .build();
+//        return Health.outOfService().withDetail("reason", "External service is out of service")
+//                .withDetail("hour", hour)
+//                .build();
+        return Health.up().build();
     }
 }

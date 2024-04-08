@@ -32,7 +32,8 @@ public class SecurityConfig {
             "/users/signup",
             "/error",
             "/v3/api-docs/**",
-            "/swagger-ui/**"
+            "/swagger-ui/**",
+            "/actuator/prometheus"
     };
 
     private final UserDetailsServiceImpl userDetailsService;

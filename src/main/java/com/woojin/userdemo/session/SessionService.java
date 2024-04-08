@@ -80,6 +80,10 @@ public class SessionService {
      */
     private String findIdFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
+        if (isNull(cookies)) {
+            return null;
+        }
+
         Optional<Cookie> sessionCookie = Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(SessionService.COOKIE_KEY)).findFirst();
 
         if (!sessionCookie.isPresent()) {

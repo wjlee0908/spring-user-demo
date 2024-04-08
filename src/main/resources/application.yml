@@ -57,8 +57,8 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
-  #        include: health, info, beans
+        #        include: '*'
+        include: health, info, prometheus
   endpoint:
     health:
       show-details: always
@@ -74,7 +74,10 @@ management:
       enabled: true
     git:
       mode: full
-
+  metrics:
+    tags:
+      application: ${spring.application.name}
+#      application: 123
 info:
   contact:
     email: support@example.com
