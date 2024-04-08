@@ -58,7 +58,10 @@ management:
     web:
       exposure:
         include: '*'
-  #        include: health, info, beans,
+    #        include: health, info, beans,
+  endpoint:
+    health:
+      show-details: always
   info:
     os:
       enabled: true
@@ -66,6 +69,7 @@ management:
       enabled: true
     env:
       enabled: true
+
 info:
   contact:
     email: support@example.com
