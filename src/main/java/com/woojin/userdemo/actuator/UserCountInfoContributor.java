@@ -1,4 +1,4 @@
-package com.woojin.userdemo.info;
+package com.woojin.userdemo.actuator;
 
 import com.woojin.userdemo.user.UserRepository;
 import lombok.RequiredArgsConstructor;
