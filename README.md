@@ -21,10 +21,16 @@ efficient way to authenticate users within a Spring-based application.
 
 ### Technologies Used
 
-- `Spring Security`
-- `Spring Session`
-- `log4j2`
-- `slf4j`
+- Authentication
+    - `Spring Security`
+    - `Spring Session`
+- Logging
+    - `log4j2`
+    - `slf4j`
+- Monitoring
+    - `Spring Boot Actuator`
+    - `Prometheus`
+    - `Grafana`
 - `Spring Boot`
 - `Spring Framework`
 
